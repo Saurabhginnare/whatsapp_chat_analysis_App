@@ -10,8 +10,6 @@ if uploaded_file is not None:
     bytes_data = uploaded_file.getvalue()
     data = bytes_data.decode("utf-8")
     df = preprocesser.perprocess(data)
-    st.dataframe(df)
-
     #fetch unique users
 
     user_list = df['user'].unique().tolist()
@@ -21,8 +19,9 @@ if uploaded_file is not None:
     selected_user = st.sidebar.selectbox("Show analysis wrt",user_list)
     if st.sidebar.button("Show Analysis"):
         num_messages,words,num_media_messages,num_links = helper.fetch_stats(selected_user,df)
-
+        st.title("Top Statistics")
         col1,col2,col3,col4 = st.columns(4)
+        
         with col1:
             st.header("Total Messages ")
             st.title(num_messages)
@@ -35,10 +34,18 @@ if uploaded_file is not None:
         with col4:
             st.header("Total number of links shared")
             st.title(num_links)
+            
+        st.title("Monthly timeline")
+        timeline = helper.monthly_timeline(selected_user,df)
+        fig, ax = plt.subplots()
+        ax.plot(timeline['time'], timeline['message'], marker='o')  # Adding marker for better visibility
+        ax.set_xlabel('Time')
+        ax.set_ylabel('Number of Messages')
+        ax.set_title('Monthly Message Timeline')
+        plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
 
-        #finding the busiest user in the group(Group level)
         if selected_user == 'Overall':
-            st.title("Most bussy users")
+            st.title("Most active user")
             x,new_df = helper.most_busy_user(df)
             fig,ax = plt.subplots()
             col1,col2 = st.columns(2)
